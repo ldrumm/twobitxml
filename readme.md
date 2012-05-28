@@ -13,18 +13,17 @@ libtwobitxml is a lightweight DOM-based xml parsing library written in C. It is 
 -
 > **1 - Import your XML file**
 
-    wchar_t * xmlText = xmlOpenFile("path/to/my/file.xml");
+   node * tree = xmlGetDOMFromFile("path/to/my/file.xml");
     
     
-> **2 - Extract everything and build DOM**
+> **2 - Find the node you need**
 
-    node  * tree = xmlGetDOM(xmlText);
+    tree = xmlGetNodeFromDotPath(tree, L"DocRoot.drawing.pixels.rgb_triplets"); 
     
 
 > **3 - Get the data you want as a C-native type using familiar Javascript like dotted separators**
     
-    tree = xmlGetNodeFromDotPath(tree, L"DocRoot.drawing.pixels.rgb_triplets");   	//find node
-    pixels = xmlGetDataArrayDouble(tree, 10);										//get a native C array of 12 data elements
+    myFloatArray = xmlGetDataArrayDouble(tree, 12);			//get a native C array of 12 data elements
   
 
 Dependencies and Supported systems
