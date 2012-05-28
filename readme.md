@@ -1,6 +1,6 @@
 twobitxml
 =========
-libtwobitxml is a lightweight DOM-based xml parsing library written in C. It is non validating and intended to simplify a programmers route to proper XML import. 
+libtwobitxml is a lightweight DOM-based xml parsing library written in C. It is non-validating and intended to simplify a programmers route to proper XML import. 
 
 **Features**
 
@@ -23,8 +23,8 @@ libtwobitxml is a lightweight DOM-based xml parsing library written in C. It is 
 
 > **3 - Get the data you want as a C-native type using familiar Javascript like dotted separators**
     
-    tree = xmlGetNodeFromDotPath(L"DocRoot.drawing.pixels.rgb_triplets");   //find node
-    pixels = xmlGetDataArrayDouble(tree, 0);    //get a native C array of your data
+    tree = xmlGetNodeFromDotPath(tree, L"DocRoot.drawing.pixels.rgb_triplets");   	//find node
+    pixels = xmlGetDataArrayDouble(tree, 10);										//get a native C array of 12 data elements
   
 
 Dependencies and Supported systems
@@ -55,6 +55,6 @@ A Doxygen generated programmers' manual is available in PDF, HTML etc, and can b
 
 
 
-  [libiconv]: www.gnu.org/s/libiconv/
+[libiconv]: www.gnu.org/s/libiconv/
   
     

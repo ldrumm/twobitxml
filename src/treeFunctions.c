@@ -20,21 +20,32 @@ freely, subject to the following restrictions:
    3. This notice may not be removed or altered from any source
    distribution.
 */
+/**
+@file treeFunctions.c
+@brief contains functions for all the tree related utility functions
+@author Luke Drummond
+@date Monday 28/05/2012 
+*/
 #include "treeFunctions.h"
 
+
+
+/**\brief Frees all nodes in a given tree and nullifies all references. 
+	Can be called on any node of a given subtree, or the root node.
+	
+@param [in] tree node pointer to the tree or subtree to unlink and free.
+*/
 void xmlTreeFree(node * tree)
 {
+
 	#ifdef DEBUG
 	fprintf(stderr, "xmlTreeFree()\n");
 	#endif
-/*
-remove all nodes in a given tree. and free all dynamically allocated memory
-can be called on any subtree, or the root node
-*/
 
 	void (*recurse)(node *tree) = xmlTreeFree;	//function pointer for recursion
 
-	if(!tree)	return;
+	if(!tree)
+		return;
 	node *p = tree->parent;		//pointer to the parent node
 	node *l = tree->left;		//left child node: for less than
 	node *r = tree->right;		//right child node for more than or equal
@@ -81,9 +92,16 @@ find out by comparing pointers whether this subtree is a left or right child or 
 	return;
 }
 
+/**\brief Adds a new blank child to the given node.
+This function will succeed only if the given node has no child. Unlike xmlTreeAddSiblingNode, this function will not traverse the tree to find the first empty child reference.
 
+@param [in] tree The node pointer to which to directly add the child.
+@param [in] n Integer reference for counting nodes.
+@return The new node, or NULL on failure.
+*/
 node * xmlTreeAddChildNode(node * tree, int n)
 {
+
 	node * newNode = NULL;
 
 	if(!tree)	/* if the tree pointer is NULL we need a new binary tree */
@@ -121,8 +139,15 @@ node * xmlTreeAddChildNode(node * tree, int n)
 }
 
 
+/**\brief Adds a new sibling to the given node.
+This function can be called with reference to any node, whether siblings exist or not. If the given node already has a sibling, the sibling tree is traversed and the node is added to the end of the branch.
+
+@param [in] tree The node pointer to which to add the sibling.
+@param [in] n Integer reference for counting nodes
+*/
 node * xmlTreeAddSiblingNode(node * tree, int n)
 {
+
 	node * newNode = NULL;
 	if(!tree)	/* if the tree pointer is NULL we need a new binary tree*/
 	{
@@ -161,17 +186,20 @@ node * xmlTreeAddSiblingNode(node * tree, int n)
 }
 
 
-node * xmlTreeSearchElementSiblingsID(node * tree, wchar_t * elementID)
-/*
-searches a given tree for a tag returning NULL if the tag is not found - otherwise a pointer to the first node found
+/**\brief Searches given node for first sibling with the called tag(elementID).
+
+@param [in] tree The node pointer to which to directly add the child.
+@param [in] elementID The element ID (xml tag) to find.
+@return NULL if the tag is not found - otherwise a pointer to the first node found.
 */
+node * xmlTreeSearchElementSiblingsID(node * tree, wchar_t * elementID)
+
 {
 	node * found = NULL;	// to store pointers returned so they can be tested before returning NULL
 	node * (*recurse)(node *tree, wchar_t *elementID) = xmlTreeSearchElementSiblingsID;	// recursive definition of this function
 	if(!tree)
-	{
 		return NULL;
-	}
+
 	node *l = tree->left;
 	node *r = tree->right;
 
@@ -210,8 +238,16 @@ searches a given tree for a tag returning NULL if the tag is not found - otherwi
 }
 
 
+/**\brief Searches given node for first children with the given elementID (xml tag).
+Searches only 1 level below the given node. i.e. checks given node, then all siblings of first child.
+
+@param [in] tree The node from which to search.
+@param [in] elementID String of element ID (xml tag) to find.
+@return A pointer to the first node found. NULL if not found.
+*/	
 node * xmlTreeSearchSubElementID(node * tree, wchar_t * elementID)
 {
+
 	if(tree)
 	{
 		if(wcscmp(tree->xmlData.elementID, elementID) == 0)
@@ -228,24 +264,25 @@ node * xmlTreeSearchSubElementID(node * tree, wchar_t * elementID)
 }
 
 
-node * xmlTreeHasNode(node * tree, int val)
-/*
-searches a given tree for val
-returns a pointer to the node in which it was found, or NULL on failure
-TODO: add the ability to return multiple values in the case that there is more than one instance of a given value
+/**\brief Searches all nodes on a given tree for the requested reference number.
+
+@param [in] tree the node pointer to which to directly add the child.
+@param [in] n the integer reference to find
+@return a pointer to the node if reference is found, or NULL on failure
 */
+node * xmlTreeHasNode(node * tree, int n)
+
 {
 	if(!tree)
-	{
 		return NULL;
-	}
+
 	node * found = NULL;									// to store pointers returned so they can be tested before returning NULL
-	node * (*recurse)(node * tree, int val) = xmlTreeHasNode;	// recursive definition of this function
+	node * (*recurse)(node * tree, int n) = xmlTreeHasNode;	// recursive definition of this function
 	node * l = tree->left;
 	node * r = tree->right;
 
 /*see if we've found what we need*/
-	if(tree->data == val)
+	if(tree->data == n)
 	{
 		return tree;
 	}
@@ -255,13 +292,13 @@ TODO: add the ability to return multiple values in the case that there is more t
 * everything will propagate upwards on return. recurse is just a useful alias for this function
 */	if(l)
 	{	
-		found = recurse(l, val);
+		found = recurse(l, n);
 		if(found)	
 			return found;
 	}
 	if(r)
 	{
-		found = recurse(r, val);
+		found = recurse(r, n);
 	}
 	return found;
 }
@@ -272,9 +309,8 @@ void xmlTreePrint(node * tree)
 	void (*recurse)(node *tree) = xmlTreePrint;	//recursive definition of this function
 
 	if(!tree)
-	{
 		return;
-	}
+
 	node * l = tree->left;
 	node * r = tree->right;
 
@@ -300,9 +336,14 @@ void xmlTreePrint(node * tree)
 }
 
 
+/**\brief finds the root node of a given tree
+
+@return The root node of the tree. NULL on failure.
+*/
 node * xmlTreeTop(node *tree)
 {
-
+	if(!tree) 
+		return NULL;
 	while(tree->parent!=NULL)
 	{
 		#ifdef DEBUG
@@ -314,34 +355,49 @@ node * xmlTreeTop(node *tree)
 }
 
 
-node * xmlTreeUp(node * tree, int count)
+/**\brief finds the node n edges closer to the root.
+
+@param [in] tree The node pointer from which to traverse upwards.
+@param [in] n The number of edges of any class to traverse towards the root
+@return The node n edges closer to root, or root node - Whichever comes first.
+*/
+node * xmlTreeUp(node * tree, int n)
 {
-	if(count < 0)
-		count = 0 - count;
-	while(tree->parent!=NULL && count != -1)
+	if(!tree)
+		return NULL;
+	if(n < 0)
+		n = 0 - n;
+	while(tree->parent!=NULL && n != -1)
 	{
 		#ifdef DEBUG
 		fprintf(stderr, "xmlTreeUp():going up tree\n");
 		#endif
 		tree = tree->parent;
-		count--;
+		n--;
 	}
 	return tree;
 }
 
 
-node * xmlFindNthParent(node * tree, int i)
+/**\brief finds the nth parent node of a given node.
+	This function traverses up the tree and finds the Nth parent-child relationship between given node and root.
+	
+@param [in] tree The node pointer from which to traverse upwards.	
+@param [in] n The number of parent-child relationships to traverse upwards through.
+@return The nth parent node of the tree, or root - Whichever comes first.
+*/
+node * xmlFindNthParent(node * tree, int n)
 {
 	if(!tree)
 		return NULL;
 	node * old = NULL;
-	i = (i < 0) ? i : 0 - i;
-	while(i < 0)
+	n = (n < 0) ? n : 0 - n;
+	while(n < 0)
 	{
 		while(tree->parent!=NULL)
 		{
 			#ifdef DEBUG
-			fprintf(stderr, "xmlFindNthParent():going up tree%d\n",i);
+			fprintf(stderr, "xmlFindNthParent():going up tree%d\n",n);
 			#endif
 			if(tree->parent)
 			{	
@@ -354,12 +410,21 @@ node * xmlFindNthParent(node * tree, int i)
 			}
 			else break;
 		}
-		i++;
+		n++;
 	}
 	return tree;
 }
 
 
+/**\brief Saves a textfile of an xml DOM in graphviz dot format.
+	Outputs a directed graph ("digraph") of the given tree suitable for further processing with GNU dot, neato or similar.  Child nodes are displayed on the left, siblings on right. Tree nodes are labelled with the elementID.
+
+@param [in] tree The node pointer from which to save directed graph
+@param [in] filename The full or relative path to which to save the output file.  May be null if file is non NULL.
+@param [out] file File pointer to which to save the Graphviz file. Optionally may be NULL if filepath is non-NULL.
+@param [in] depth  Integer reference for internal use.  Users should call this function from the macro.
+@return 0 on success. -1 on error.
+*/
 int xmlTreeSaveGraphviz(node * tree, const char * filename, FILE * file, int depth)
 {
 	int (*recurse)(node * tree, const char * filename, FILE * file, int depth) = xmlTreeSaveGraphviz;

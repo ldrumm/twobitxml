@@ -20,8 +20,10 @@ freely, subject to the following restrictions:
    3. This notice may not be removed or altered from any source
    distribution.
 */
-#include "xmlFunctions.h"
 
+
+#include "xmlFunctions.h"
+/**@file*/
 
 wchar_t * xmlStripHeader(wchar_t * xmlData)
 {
@@ -39,7 +41,7 @@ wchar_t * xmlStripHeader(wchar_t * xmlData)
 }
 
 
-wchar_t  * xmlConvertEncoding(char * xmlData, int len)
+static wchar_t * xmlConvertEncoding(char * xmlData, int len)
 {
 	int err = 0;
 	int i = 0;
@@ -123,7 +125,12 @@ wchar_t  * xmlConvertEncoding(char * xmlData, int len)
 	return out;
 }
 
-
+/**
+@brief Opens a text file and tries to convert the text to an internal unicode representation.  
+If the xml file does not have a valid xml header, will assume UTF-8 or UTF-16 if there is a valid BOM.
+@param [in] filePath  The full, or relative system path to the file to open.  Closes file before function exits.
+@return A newly allocated Wide Character string suitable for further processing.  NULL on failure.
+*/
 wchar_t * xmlOpenFile(const char * filePath)
 {
 	/*open file*/
@@ -256,9 +263,15 @@ wchar_t * xmlGetStringFromRange(range temp)
 }
 
 
-int xmlCharsToFirstElement(wchar_t * string)		// < the VERY beginning of the tag - this is THE fundamental function
+/**
+@brief Finds the VERY beginning of the next tag i.e. the '<'.
+This is the most important raw text searchng function.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return The number of characters to point the string to the very beginning of the next opening tag. -1 on error.
+*/
+int xmlCharsToFirstElement(wchar_t * string)		
 {
-// returns the number of characters to point the string to the very beginning of the next opening tag
+
 	
 	#ifdef DEBUGFUNCTIONS
 	printf("xmlCharsToFirstElement()\n");
@@ -300,7 +313,7 @@ int xmlCharsToFirstElement(wchar_t * string)		// < the VERY beginning of the tag
 			}
 			else
 			{
-				// !DOCTYPE etc - currently unhandled
+				// !DOCTYPE etc - currently ignored
 				#ifdef DEBUG
 				printf("xmlCharsToFirstElement():skipping unhandled identifier:%lc%lc%lc%lc%lc%lc%lc%lc...\n",\
 					start[1],start[2],start[3],start[4],start[5],start[6],start[7], start[8]);
@@ -342,9 +355,13 @@ int xmlCharsToFirstElement(wchar_t * string)		// < the VERY beginning of the tag
 }
 
 
+/**
+@brief Skips the first element and return the number of chars to the next available element.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return characters to next element. -1 if not found or error.
+*/
 int xmlCharsToNextElement(wchar_t * string)
-{	//skips the first element if it's already being pointed to and return the number of chars to the next available element
-	// returns -1 if not found.
+{	
 	int i = 0;
 	if(!string)
 		return -1;
@@ -359,6 +376,11 @@ int xmlCharsToNextElement(wchar_t * string)
 }
 
 
+/**
+@brief Retrieves the range of First elementID
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return range.from = start of elementID. chars.from end of elementID.  .from and .to will be NULL on error.
+*/
 range xmlFirstElementIDRange(wchar_t * string)
 {
 	
@@ -439,6 +461,11 @@ don't be dick
 }
 
 
+/**
+@brief Creates a new wide character string of the first elementID
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return Pointer to newly allocated Wide string containing elementID. NULL on error.
+*/
 wchar_t * xmlGetFirstElementIDString(wchar_t * string)
 {
 	if(!string)
@@ -447,6 +474,11 @@ wchar_t * xmlGetFirstElementIDString(wchar_t * string)
 }
 
 
+/**
+@brief finds the range of the whole first element including the open an close tags, and all subelements/
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return range.from = start of element. range.from - end of element.  range.from and range.to will be NULL on error.
+*/
 range xmlFirstElementAllRange(wchar_t * string) 	// contains "<elID attr="1.0">to</elID>"
 {
 	wchar_t * openStart = NULL;		// first character of the xml Element including '<'
@@ -552,6 +584,11 @@ range xmlFirstElementAllRange(wchar_t * string) 	// contains "<elID attr="1.0">t
 }
 
 
+/**
+@brief Creates a new wide character string of the whole first element found.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return Pointer to newly allocated Wide string containing whole element. NULL on error.
+*/
 wchar_t * xmlGetFirstElementAllString(wchar_t * string)
 {
 	if(!string)
@@ -560,6 +597,11 @@ wchar_t * xmlGetFirstElementAllString(wchar_t * string)
 }
 
 
+/**
+@brief Finds the range of the whole first element attributes if any.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return range.from = start of element attributes. range.from - end of attributes.  range.from and range.to will be NULL on error.
+*/
 range xmlFirstElementAttrRange(wchar_t * string)	//: contains "attr=1.0"
 {
 	#ifdef DEBUGFUNCTIONS
@@ -622,6 +664,11 @@ range xmlFirstElementAttrRange(wchar_t * string)	//: contains "attr=1.0"
 }
 
 
+/**
+@brief Creates a new wide character string of the attributes of the first element found.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return Pointer to newly allocated Wide string containing attributes if any. NULL if not or error.
+*/
 wchar_t * xmlGetFirstElementAttrString(wchar_t * string)
 {
 	if(!string)
@@ -630,6 +677,11 @@ wchar_t * xmlGetFirstElementAttrString(wchar_t * string)
 }
 
 
+/**
+@brief Finds the range of the whole first element's data field if any.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return range.from = start of element data field. range.from: end of data section if any.  range.from and range.to will be NULL on error.
+*/
 range xmlFirstElementDataRange(wchar_t * string)
 {
 	range ret = {NULL,NULL};
@@ -756,6 +808,11 @@ range xmlFirstElementDataRange(wchar_t * string)
 }
 
 
+/**
+@brief Creates a new wide character string of the data section of the first element found.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return Pointer to newly allocated Wide string containing data filed if any. NULL if none or error.
+*/
 wchar_t * xmlGetFirstElementDataString(wchar_t * string)
 {
 	if(!string)
@@ -764,24 +821,29 @@ wchar_t * xmlGetFirstElementDataString(wchar_t * string)
 }
 
 
-wchar_t * xmlGetNamedElementAll( wchar_t * string,  wchar_t * elementID)
-{
-	return NULL;
-}
+//wchar_t * xmlGetNamedElementAll( wchar_t * string,  wchar_t * elementID)
+//{
+//	return NULL;
+//}
 
 
-wchar_t * xmlGetNamedElementData( wchar_t * string,  wchar_t * elementID)
-{
-	return NULL;
-}
+//wchar_t * xmlGetNamedElementData( wchar_t * string,  wchar_t * elementID)
+//{
+//	return NULL;
+//}
 
 
-wchar_t * xmlGetNamedElementAttrString(wchar_t * string,  wchar_t * elementID)
-{
-	return NULL;
-}
+//wchar_t * xmlGetNamedElementAttrString(wchar_t * string,  wchar_t * elementID)
+//{
+//	return NULL;
+//}
 
 
+/**
+@brief gets the length of the whole of the first element found.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return positive integer of length of next element. -1 on error.
+*/
 int xmlFirstElementAllLen(wchar_t * string)
 {
 	if(!string)
@@ -793,9 +855,13 @@ int xmlFirstElementAllLen(wchar_t * string)
 }
 
 
+/**
+@brief Tests whether the pointed-to element has a direct child.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return The number of characters to the first child element of first element found after the given pointer. -1 if no child element found.
+*/
 int xmlCharsToFirstChildElement(wchar_t * string)
-{	// returns the number of characters to the first child element of first element found after the given pointer.
-	// returns -1 if no child element found.
+{	
 	wchar_t *temp;
 	int i = 0;
 	range elRange;
@@ -814,6 +880,11 @@ int xmlCharsToFirstChildElement(wchar_t * string)
 }
 
 
+/**
+@brief Moves the text pointer forward to the beginning of the next element.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return The number of characters moved. -1 if no next element found.
+*/
 int xmlSeekNextElement(wchar_t ** fp)
 {	//moves the given pointer to the beginning of the next tag.
 	//returns number of characters moved, or -1 on error (not found)
@@ -831,10 +902,14 @@ int xmlSeekNextElement(wchar_t ** fp)
 }
 
 
-
+/**
+@brief Given a pointer to the beginning of an xml tag, this function returns 1 if the firstmost tag found has an immediate sibling, and a negative number if not.  
+Negative numbers represent the number of closing tags found between the first located element end, and the second element start.  This is how far back up the tree to climb.  Unlike most search functions, returns 0 on error, 1 if the element has an immediate sibling.
+@param [in] string The xml text pointer from which to search forward for the next opening tag.
+@return 1 if the given tag has an immediate sibling. Negative number representing the number of closing tags between the end of the tag and the next opening tag. 0 on error.
+*/
 int xmlFirstElementHasSiblings(wchar_t * string)
-{	/// given a pointer to the beginning of an xml tag, this function returns 1 if the firstmost tag found has an immediate sibling, and a negative number if not.  negative numbers represent the number of closing tags found between the first located element end, and the second element start.  this is how far back up the tree to climb. 
-	/// unlike most search functions, returns zero on error, 1 if the element has an immediate sibling.
+{	
 	int i = 0;
 	wchar_t * temp = NULL;
 	wchar_t * temp2 = NULL;

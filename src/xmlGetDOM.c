@@ -20,36 +20,49 @@ freely, subject to the following restrictions:
    3. This notice may not be removed or altered from any source
    distribution.
 */
+
+/** 
+@file
+*/
+
+#include "xmlGetDOM.h"
 #include "xmlFunctions.h"
 #include "treeFunctions.h"
 #include "xmlDataTypes.h"
 
-node * xmlGetDOM(wchar_t * xmlData)
+
+/**@brief Constructs a complete DOM binary tree from the given string.
+	This is the high level tree-building function that builds a complete Document Object Model and extracts element IDs, attributes, and data for processing by the real user friendly functions found in xmlGetters.c
+	
+@param [in] xmlText The wide character string of raw xml data.
+@return A complete DOM tree on success, NULL on error.
+*/
+node * xmlGetDOM(wchar_t * xmlText)
 {
-	if(!xmlData)
+	if(!xmlText)
 		return NULL;
 	int i = 0;
 	int count = 0;
 	node * xmlTree = xmlTreeAddChildNode(NULL, 0);
 	if(!xmlTree)
 		return NULL;
-	i = xmlCharsToFirstElement(xmlData);
+	i = xmlCharsToFirstElement(xmlText);
 	if(i == -1)
 		return NULL;
-	xmlData += i;
+	xmlText += i;
 	
 	while(1)
 	{
-		xmlTree->xmlData.elementID = xmlGetFirstElementIDString(xmlData);
-		xmlTree->xmlData.elementAttr = xmlGetFirstElementAttrString(xmlData);
-		xmlTree->xmlData.elementData = xmlGetFirstElementDataString(xmlData);
+		xmlTree->xmlData.elementID = xmlGetFirstElementIDString(xmlText);
+		xmlTree->xmlData.elementAttr = xmlGetFirstElementAttrString(xmlText);
+		xmlTree->xmlData.elementData = xmlGetFirstElementDataString(xmlText);
 		count++;
-		if(xmlCharsToFirstChildElement(xmlData)!= -1)
+		if(xmlCharsToFirstChildElement(xmlText)!= -1)
 		{
 			xmlTree = xmlTreeAddChildNode(xmlTree, count);
 			goto cont;
 		}
-		i = xmlFirstElementHasSiblings(xmlData);
+		i = xmlFirstElementHasSiblings(xmlText);
 		if(i == 0)	//error
 			break;	
 		if(i < 0)
@@ -63,9 +76,29 @@ node * xmlGetDOM(wchar_t * xmlData)
 			xmlTree = xmlTreeAddSiblingNode(xmlTree, count);		
 		}
 	cont:	
-		if(xmlSeekNextElement(&xmlData) == -1)	break;
+		if(xmlSeekNextElement(&xmlText) == -1)	break;
 	}
 	return xmlTreeTop(xmlTree);
 }
+
+
+/**
+@brief Wrapper to xmlGetDOM allowing to build a DOM tree straight from a relative or complete system path.
+@param [in] path System path to a xml text file to open.
+@return A complete DOM tree on success, NULL on error.
+*/	
+node * xmlGetDOMFromPath(const char * path)
+{
 	
+	wchar_t * xmlText = NULL;
+	node * tree;
+	if(!path) 
+		return NULL;
+	xmlText = xmlOpenFile(path);
+	if(!xmlText) 
+		return NULL;
+	tree = xmlGetDOM(xmlText);
+	free(xmlText);
+	return tree;
+}
 

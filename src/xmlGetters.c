@@ -19,9 +19,17 @@ freely, subject to the following restrictions:
 
    3. This notice may not be removed or altered from any source
    distribution.
-*/
+*//**@file*/
+
 #include "xmlGetters.h"
 
+
+/**@brief Search function that uses Javascript like dotted heirarchy for notating the xml node.
+	This function uses a similar syntax to the familar printf family of routines. allowing access to xml data by index, and attribute
+@param [in] tree Tree node to search from
+@param [in] dot_path The dotted path indicating heirarchy of the data.
+@param [in] ... optional list of variables as indicated by format specifiers in the dotpath.
+@return The node requested or NULL on failure.*/
 node * xmlGetNodeFromDotPath(node * tree, const wchar_t * dot_path, ...)
 {
 //	void * arg;
@@ -96,43 +104,24 @@ node * xmlGetNodeFromDotPath(node * tree, const wchar_t * dot_path, ...)
 	return tree;
 }
 
-
-node * __xmlGetNodeFromDotPath(node * tree, const wchar_t * dot_path, ...)
-{
-	
-	va_list argp;
-	va_start(argp, dot_path);
-	//tree = xmlGetNodeFromDotPath(tree, dot_path, argp);
-	va_end(argp);
-	return tree;
-}
-/*
+/**<
+@usage
 <d = 	int representing Nth matching node on branch:
 <n =	wchar_t * representing attribute name
 <v =	wchar_t * representing attribute value
 <a = 	wchar_t * representing name="value" pair
-*/
-/* 
-tree = getNodeFromDotPath("movie.credits.cast.extra[%d]", 3) will return the 3rd 'extra' listed as a child of movie->credits->cast
+ 
+tree = getNodeFromDotPath("movie.credits.cast.extra<d", 3) will return the 3rd 'extra' listed as a child of movie->credits->cast
 i.e.
-	movie
-	_|__
-	x	credits
-		_|___________________
-	   x	cast			crew etc.
-			_|__________________________________________________
-		   x	lead	extra(0)	extra(2) other(0) extra (3)	director (0)
-														*
-string representing attribute id
-string representing attribute value
-*/
-
-
-static int _xmlGetAttrCount(node * tree)
-{
-	return -1;
-		
-}
+\verbatim
+	[movie]
+    _|__
+   x    [credits]
+       _|____________________________
+       x    [cast]			[crew etc].
+            |____________________________________________________V_____________________
+            x    [lead]  [extra(0)]  [extra(2)]  [other(0)]  [extra (3)]  [director (0)]
+\endverbatim*/
 
 
 static xmlValue _xmlgetAttrValLong(node * tree, const wchar_t * attrID)
@@ -156,12 +145,6 @@ static xmlValue _xmlgetAttrValString(node * tree, const wchar_t * attrID)
 	xmlValue a;
 	a.errNum = -1;
 	return a;
-}
-
-
-static int _xmlGetDataCount(node * tree)
-{
-	return -1;
 }
 
 
@@ -198,8 +181,6 @@ static xmlValue _xmlGetDataValLong(node * tree, int index)
 
 static xmlValue _xmlGetDataValDouble(node * tree, int index)
 {
-	
-	
 	xmlValue ret;
 	ret.value.doubleVal = 0.0;
 	ret.errNum = -1;
@@ -217,7 +198,6 @@ static xmlValue _xmlGetDataValDouble(node * tree, int index)
 	
 	wcsncpy(data, tree->xmlData.elementData, wcslen(tree->xmlData.elementData));
 
-	
 	while(i <= index)
 	{
 		i++;
@@ -247,7 +227,7 @@ static const wchar_t * _xmlGetDataValString(node * tree)
 }
 
 
-static xmlValue _xmlGetDataValBool(node * tree, int index)
+static xmlValue _xmlGetDataValBool(node * tree, int index)//TODO
 {
  //http://www.w3.org/TR/xmlschema-2/ :
 //"An instance of a datatype that is defined as ·boolean· can have the following legal literals {true, false, 1, 0}."
@@ -257,28 +237,24 @@ static xmlValue _xmlGetDataValBool(node * tree, int index)
 }
 
 
-/**
-@return all these functions return a pointer to a newly malloced copy of an array containing the number of elements requested or NULL if not available. the user is responsible for freeing the returned values.
-*/
-
-
-bool * xmlGetDataArrayBool(node * tree, const wchar_t * dot_path, int count)
+bool * xmlGetDataArrayBool(node * tree, int count)//TODO
 {
-	return NULL;	//TODO
+	return NULL;
 }
 
 
-double * xmlGetDataArrayDouble(node * tree, const wchar_t * dot_path, int count)
+double * xmlGetDataArrayDouble(node * tree, int count)
 {
-	if((!tree)||(!dot_path))
+	if(!tree)
 		return NULL;
 	int i;
 	double * values = NULL;
 	xmlValue temp;
+//	if(count == 0)											//FIXME
+//		count = xmlGetDataCount(tree, XML_DATATYPE_LONG);	//FIXME
 	values = malloc(count * sizeof(double));
 	if(!values)
 		return NULL;
-	tree = xmlGetNodeFromDotPath(tree, dot_path);
 
 	for(i = 0; i < count; i ++)
 	{
@@ -294,17 +270,20 @@ double * xmlGetDataArrayDouble(node * tree, const wchar_t * dot_path, int count)
 }
 
 
-long * xmlGetDataArrayLong(node * tree, const wchar_t * dot_path, int count)
+long * xmlGetDataArrayLong(node * tree, int count)
 {
-	if((!tree)||(!dot_path))
+	if(!tree)
 		return NULL;
 	int i;
 	xmlValue temp;
 	long * values = NULL;
+//	if(count == 0)											//FIXME
+//		count = xmlGetDataCount(tree, XML_DATATYPE_LONG);	//FIXME
+
 	values = malloc(count * sizeof(long));
 	if(!values)
 		return NULL;
-	tree = _xmlGetNodeFromDotPath(tree, dot_path);
+
 	for(i = 0; i < count; i ++)
 	{
 		temp = _xmlGetDataValLong(tree, i);
@@ -319,17 +298,16 @@ long * xmlGetDataArrayLong(node * tree, const wchar_t * dot_path, int count)
 }
 
 
-wchar_t * xmlGetDataArrayString(node * tree, const wchar_t * dot_path, int count)
-{///if count is zero or less the whole String will be copied
-	if((!tree)||(!dot_path))
+wchar_t * xmlGetDataArrayString(node * tree, int count)
+{///if count is zero or less the whole string will be copied
+	if(!tree)
 		return NULL;
 	int len;
 	wchar_t * string = NULL;
 	if(tree)
 	{
-		tree = _xmlGetNodeFromDotPath(tree, dot_path);
 		if(tree->xmlData.elementData)
-		{	len = (count < 1) ? wcslen(tree->xmlData.elementData) + 1 : count +1;
+		{	len = (count < 1) ? wcslen(tree->xmlData.elementData) + 1 : count + 1;
 			string = calloc(len, sizeof(wchar_t));
 			if(string)
 			{
@@ -342,13 +320,21 @@ wchar_t * xmlGetDataArrayString(node * tree, const wchar_t * dot_path, int count
 	return NULL;
 }
 
-int xmlGetAttrCount(node * tree, const wchar_t * dot_path)
+
+char * xmlGetDataArrayStringUTF8(node * tree, int count)
+{
+	return NULL;
+
+}
+
+
+int xmlGetAttrCount(node * tree)
 {
 	return -1;
 }
 
 
-int xmlGetDataCount(node * tree, const wchar_t * dot_path)
+int xmlGetDataCount(node * tree, int datatype)
 {
 	return -1;
 }
