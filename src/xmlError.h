@@ -20,3 +20,10 @@ freely, subject to the following restrictions:
    3. This notice may not be removed or altered from any source
    distribution.
 */
+#ifndef XML_ERROR_H
+#define XML_ERROR_H
+#define XML_ERR_LEN 1024
+static const char * _xmlError(const char * message, va_list argp);
+void _xmlSetError(const char * message, ...);
+const char * xmlGetErrMesg(void);
+#endif

@@ -20,3 +20,43 @@ freely, subject to the following restrictions:
    3. This notice may not be removed or altered from any source
    distribution.
 */
+#include <stdarg.h>
+#include <stdio.h>
+#include "xmlError.h"
+
+
+static const char * _xmlError(const char * message, va_list argp)
+{
+	static char error[10][XML_ERR_LEN];
+	static int last_error_index = 0;
+	
+	if(!message)			//get last error by calling with NULL
+	{
+		last_error_index--;
+		if(last_error_index < 0)
+			last_error_index = 9;
+		return (const char *)&(error[last_error_index+1]);
+	}
+	last_error_index++;
+	last_error_index %= 10;
+	vsnprintf(&(error[last_error_index][0]), XML_ERR_LEN-1, message, argp);
+}
+
+
+
+void _xmlSetError(const char * message, ...)
+{
+	if(!message)	//avoid overwriting error list with NULLS
+		return;
+	va_list argp;
+	va_list argp2;
+	va_start(argp, message);
+	va_copy(argp2, argp);
+	_xmlError(message, argp2);
+}
+
+const char * xmlGetErrMesg(void)
+{
+	return _xmlError(NULL, NULL);
+}
+
