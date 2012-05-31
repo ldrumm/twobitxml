@@ -1,3 +1,9 @@
+#include "../xmlDataTypes.h"
+#include "../treeFunctions.h"
+#include "../xmlGetters.h"
+#include "../xmlGetDOM.h"
+#include "../xmlFunctions.h"
+
 int main(int argc, char ** argv)
 {
 	int c;
@@ -15,25 +21,25 @@ int main(int argc, char ** argv)
 	node * tree = NULL;
 	tree = xmlGetDOM(xmlData);
 	tree = xmlTreeTop(tree);
-	xmlTreePrint(tree);
-	xmlTreeSaveGraphviz(tree, "dotfile.gv", NULL, 0);
-	tree = xmlGetNodeFromDotPathVAarg(tree, L"COLLADA.library_effects.effect<d.profile_COMMON.newparam", 9);
+//	xmlTreePrint(tree);
+//	xmlTreeSaveGraphviz(tree, "dotfile.gv", NULL, 0);
+	tree = xmlGetNodeFromDotPath(tree, L"COLLADA.library_geometries.geometry.mesh.source.float_array", 9);
 	if(!tree)
 	{
 		printf("xmlGetNodeFromDotPathVAarg():failed\n");
 		exit(EXIT_FAILURE);
 	}
-	printf("%ls\n", tree->xmlData.elementAttr);
-	printf("%ls\n", tree->xmlData.elementData);
+//	printf("%ls\n", tree->xmlData.elementAttr);
+//	printf("%ls\n", tree->xmlData.elementData);
 
 
 
 /*	printf("0%p:\n", tree);*/
 /*	printf("%ls\n", tree->xmlData.elementID);*/
 /*	printf("%ls\n", tree->xmlData.elementAttr);*/
-	dVals = xmlGetDataArrayDouble(treeTop(tree), L"COLLADA.library_geometries.geometry.mesh.source.float_array", 52);
-	iVals = xmlGetDataArrayLong(treeTop(tree), L"COLLADA.library_geometries.geometry.mesh.triangles.p", 52);
-	s = xmlGetDataArrayString(treeTop(tree), L"COLLADA.asset.modified.", 0);
+//	dVals = xmlGetDataArrayDouble(tree, 1000);
+	iVals = xmlGetDataArrayLong(tree, 52);
+	//s = xmlGetDataArrayString(tree, 0);
 	
 	if(dVals)
 	{
@@ -41,6 +47,7 @@ int main(int argc, char ** argv)
 		while(i < 52){
 		printf("%f\n", dVals[i]);
 		i++;}
+		free(dVals);
 	}
 	if(iVals)
 	{
@@ -48,12 +55,14 @@ int main(int argc, char ** argv)
 		while(i < 52){
 		printf("%d\n", iVals[i]);
 		i++;}
+		free(iVals);
 	}
-	if(s)
+	if(s){
+	
 		printf("%ls\n", s);
 		free(s);
-		free(iVals);
-		free(dVals);
+	}
+		
 	xmlTreeFree(tree);
 	free(xmlData);
 	return 0;

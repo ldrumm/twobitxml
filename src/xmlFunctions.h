@@ -20,7 +20,9 @@ freely, subject to the following restrictions:
    3. This notice may not be removed or altered from any source
    distribution.
 */
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE //for strcasestr
+#endif
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

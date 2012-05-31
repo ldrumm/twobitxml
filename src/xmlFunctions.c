@@ -23,6 +23,7 @@ freely, subject to the following restrictions:
 
 
 #include "xmlFunctions.h"
+
 /**@file*/
 
 wchar_t * xmlStripHeader(wchar_t * xmlData)
@@ -34,7 +35,7 @@ wchar_t * xmlStripHeader(wchar_t * xmlData)
 	temp = wcsstr(xmlData, L"?>");
 	if(!temp)
 	{
-		fprintf(stderr, "xmlStripHeader():no header found - skipping");
+		_xmlSetError( "xmlStripHeader():no header found - skipping");
 		return xmlData;
 	}
 	else return temp + 3;
@@ -70,7 +71,7 @@ static wchar_t * xmlConvertEncoding(char * xmlData, int len)
 		cd = iconv_open("WCHAR_T", "UTF-8");
 		if(cd == (iconv_t) -1)
 		{
-			fprintf(stderr, "iconv_open() failed\n");
+			_xmlSetError( "iconv_open() failed\n");
 			free(out);
 			return NULL;
 		}
@@ -80,17 +81,17 @@ static wchar_t * xmlConvertEncoding(char * xmlData, int len)
 		cd = iconv_open("WCHAR_T", "UTF-16");
 		if(cd == (iconv_t) -1)
 		{
-			fprintf(stderr, "iconv_open() failed\n");
+			_xmlSetError( "iconv_open() failed\n");
 			free(out);
 			return NULL;
 		}		
 	}
 	else{	//presume utf-8
-		fprintf(stderr, "xmlConvertEncoding(): WARNING: no encoding found, presuming utf-8\n");
+		_xmlSetError( "xmlConvertEncoding(): WARNING: no encoding found, presuming utf-8\n");
 		cd = iconv_open("WCHAR_T", "UTF-8");
 		if(cd == (iconv_t) -1)
 		{
-			fprintf(stderr, "iconv_open() failed\n");
+			_xmlSetError( "iconv_open() failed\n");
 			free(out);
 			return NULL;
 		}
@@ -99,7 +100,7 @@ static wchar_t * xmlConvertEncoding(char * xmlData, int len)
 	iconv (cd, NULL, NULL, &outbytestream, (size_t *)&outbytesleft);
 	err = errno;
 	if(err != 0)
-		printf("conversion error\n");
+		_xmlSetError("conversion error\n");
 	
 	convertedChars = iconv (cd, &xmlData, (size_t *)&inbytesleft, &outbytestream, (size_t *)&outbytesleft);
 	if(convertedChars == -1)
@@ -107,7 +108,7 @@ static wchar_t * xmlConvertEncoding(char * xmlData, int len)
 		err = errno;
 		if (err == EINVAL)
 		{
-			printf("conversion not available\n");
+			_xmlSetError("character conversion not available\n");
 			free(out);
 			return NULL;
 		}
@@ -145,7 +146,7 @@ wchar_t * xmlOpenFile(const char * filePath)
 	xmlFile = fopen(filePath,"rb");
 	if( xmlFile == NULL)
 	{
-		fprintf(stderr, "file open fail\n");
+		_xmlSetError( "file open fail\n");
 		return NULL;
 	}
 
@@ -155,7 +156,7 @@ wchar_t * xmlOpenFile(const char * filePath)
 	xmlData = malloc((fSize +1)* sizeof(char));
 	if(xmlData == NULL)
 	{
-		fprintf(stderr, "malloc fail\n");
+		_xmlSetError( "malloc fail\n");
 		return NULL;
 	}
 
@@ -163,7 +164,7 @@ wchar_t * xmlOpenFile(const char * filePath)
 	(void) rewind(xmlFile);
 	if (fread(xmlData,(sizeof(char)), fSize, xmlFile)!=fSize)
 	{
-		fprintf(stderr, "file copy failure\n");
+		_xmlSetError( "file copy failure\n");
 		free(xmlData);
 		fclose(xmlFile);
 		return NULL;
@@ -202,9 +203,7 @@ wchar_t * xmlDelComment(wchar_t * xmlData)
 	buffer = (wchar_t *)malloc((dataLen * sizeof(wchar_t)) + 1);
 	if (!buffer)	
 	{	
-		#ifdef DEBUG
-		fprintf(stderr, "xmlDelComment():alloc fail\n");
-		#endif
+		_xmlSetError( "xmlDelComment():alloc fail\n");
 		return NULL;
 	}
 	
@@ -253,7 +252,7 @@ wchar_t * xmlGetStringFromRange(range temp)
 	if(len < 0)
 	{	
 		#ifdef DEBUG
-		fprintf(stderr, "xmlGetStringFromRange():invalid range\n");
+		_xmlSetError( "xmlGetStringFromRange():invalid range\n");
 		#endif
 		return NULL;
 	}
@@ -418,7 +417,7 @@ range xmlFirstElementIDRange(wchar_t * string)
 	if(iswalpha(*start) == 0)
 	{
 	#ifdef DEBUG
-		fprintf(stderr, \
+		_xmlSetError( \
 		"firstElementIDRange(): malformed xml tag - starts with number, punctuation or some other showstopper.  \
 		Please check document syntax:\
 		\"%ls\"\n", start);
@@ -541,7 +540,7 @@ range xmlFirstElementAllRange(wchar_t * string) 	// contains "<elID attr="1.0">t
 		closing = calloc((i + 4) , sizeof(wchar_t));	//FREEME
 		if(closing==NULL)
 		{
-			fprintf(stderr, "firstElementAllRange(): alloc fail - couldn't assign memory\n");
+			_xmlSetError( "firstElementAllRange(): alloc fail - couldn't assign memory\n");
 			free(closing);
 			return ret;
 		}
@@ -558,7 +557,7 @@ range xmlFirstElementAllRange(wchar_t * string) 	// contains "<elID attr="1.0">t
 		closeStart = wcsstr(string, closing);	//FIXME: invalid read according to valgrind		
 		if(closeStart == NULL)
 		{
-			fprintf(stderr, "firstElementAllRange(): malformed tag in xmlFile -  no closing tag\n");
+			_xmlSetError( "firstElementAllRange(): malformed tag in xmlFile -  no closing tag\n");
 			free(closing);
 			free(elementID);
 			return ret;
@@ -634,7 +633,7 @@ range xmlFirstElementAttrRange(wchar_t * string)	//: contains "attr=1.0"
 	}
 	if(start[i] == L'\0')
 	{
-		fprintf(stderr, "firstElementAttrRange():unexpected end of document. please check syntax\n");
+		_xmlSetError( "firstElementAttrRange():unexpected end of document. please check syntax\n");
 		return ret;
 	}
 	if(start[i - 1] == L'/')
@@ -711,12 +710,12 @@ range xmlFirstElementDataRange(wchar_t * string)
 		return ret;
 	if((id.from) > (id.to))
 	{
-		printf("invalid range\n");
+		_xmlSetError("invalid range\n");
 	}
 	openStart = string + i;
 	if(*(openStart) != L'<')
 	{	
-		printf("given bad tag start%lc\n", *openStart);
+		_xmlSetError("given bad tag start%lc\n", *openStart);
 		return ret;
 	}
 /* get opening tag end location */
@@ -741,7 +740,7 @@ range xmlFirstElementDataRange(wchar_t * string)
 		closing = calloc(((id.to -id.from) + 4), sizeof(wchar_t));	//FREEME
 		if(closing==NULL)
 		{
-			fprintf(stderr, "xmlFirstElementDataRange(): alloc fail - couldn't assign memory\n");
+			_xmlSetError( "xmlFirstElementDataRange(): alloc fail - couldn't assign memory\n");
 			return ret;
 		}
 		*(closing + 0) = L'<';
@@ -758,7 +757,7 @@ range xmlFirstElementDataRange(wchar_t * string)
 		if(closeStart == NULL)
 		{
 			#ifdef DEBUG
-			fprintf(stderr, "xmlFirstElementDataRange(): malformed tag in xmlFile - no closing tag\n");
+			_xmlSetError( "xmlFirstElementDataRange(): malformed tag in xmlFile - no closing tag\n");
 			#endif
 			free(closing);
 			return ret;
@@ -797,7 +796,7 @@ range xmlFirstElementDataRange(wchar_t * string)
 
 /* print the relevant section of the string */
 	#ifdef DEBUG
-	fprintf(stderr, "xmlFirstElementDataRange():%ls\n", xmlElementData);
+	_xmlSetError( "xmlFirstElementDataRange():%ls\n", xmlElementData);
 	#endif
 	
 	ret.from = openEnd;

@@ -28,7 +28,7 @@ freely, subject to the following restrictions:
 #include <stdarg.h>
 #include "xmlDataTypes.h"
 #include "treeFunctions.h"
-
+#include "xmlError.h"
 #ifndef XML_GETTERS_H
 #define XML_GETTERS_H
 

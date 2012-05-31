@@ -180,7 +180,8 @@ static xmlValue _xmlGetDataValLong(node * tree, int index)
 
 
 static xmlValue _xmlGetDataValDouble(node * tree, int index)
-{
+{	//wcstok destructively modifies the string given as its first argument.  Therefore, a copy needs to be made.
+	// This is extremely costly in terms of performance, and needs to be streamlined // TODO
 	xmlValue ret;
 	ret.value.doubleVal = 0.0;
 	ret.errNum = -1;
@@ -209,7 +210,7 @@ static xmlValue _xmlGetDataValDouble(node * tree, int index)
 //	if(i != index)
 //	{	
 //		FIXME
-//		printf("couldn't get requested index, not enough values in array%d\n", i);
+//		_xmlSetError("couldn't get requested index, not enough values in array%d\n", i);
 //		return ret;	// if an out of bounds index was requested, return NaN
 //	}
 	ret.value.doubleVal = wcstod(tok, NULL);

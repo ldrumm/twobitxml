@@ -5,6 +5,7 @@
 a.out
 *.gch
 *.pch
+*.so
 
 
 # Packages #

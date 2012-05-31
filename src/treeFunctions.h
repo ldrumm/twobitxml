@@ -26,6 +26,7 @@ freely, subject to the following restrictions:
 #include <assert.h>
 #include <wchar.h>
 #include "xmlDataTypes.h"
+#include "xmlError.h"
 
 
 #ifndef TREE_FUNCTIONS_H

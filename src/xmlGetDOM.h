@@ -1,4 +1,5 @@
 #include "xmlDataTypes.h"
+#include "xmlError.h"
 #ifndef XML_GET_DOM
 #define XML_GET_DOM
 

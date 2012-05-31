@@ -126,7 +126,7 @@ node * xmlTreeAddChildNode(node * tree, int n)
 			//assert(tree->left=NULL);
 			if(!(tree->left))
 				tree->left = newNode;	//children on the left
-			else fprintf(stderr, "treeAddChildNode():ERROR:: NODE %d ALREADY HAS CHILD\n", n);
+			else _xmlSetError("treeAddChildNode():ERROR:: NODE %d ALREADY HAS CHILD\n", n);
 			
 			newNode->data = n;
 			newNode->member = L"child";

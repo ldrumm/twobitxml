@@ -20,6 +20,8 @@ freely, subject to the following restrictions:
    3. This notice may not be removed or altered from any source
    distribution.
 */
+
+#include <stdarg.h>
 #ifndef XML_ERROR_H
 #define XML_ERROR_H
 #define XML_ERR_LEN 1024
