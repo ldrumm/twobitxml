@@ -148,30 +148,32 @@ static xmlValue _xmlgetAttrValString(node * tree, const wchar_t * attrID)
 }
 
 
-static xmlValue _xmlGetDataValLong(node * tree, int index)
+static xmlValue _xmlGetDataValLong(const wchar_t * string, int index)
 {
 	xmlValue ret;
 	ret.value.longVal = 0;
 	ret.errNum = -1;
-	if(!tree)
+	if(!string)
 		return ret;	
-	if(!tree->xmlData.elementData)
-		return ret;
+	//if(!tree->xmlData.elementData)
+	//	return ret;
 
-	wchar_t data[wcslen(tree->xmlData.elementData) + 1];
-	wchar_t * text = data;
+	//wchar_t data[wcslen(tree->xmlData.elementData) + 1];
+	//wchar_t * text = data;
 	wchar_t * tok = NULL;
-	wchar_t * tempptr = NULL;
-	wcsncpy(data, tree->xmlData.elementData, wcslen(tree->xmlData.elementData));
+	//wchar_t * tempptr = NULL;
+	//wcsncpy(data, tree->xmlData.elementData, wcslen(tree->xmlData.elementData));
 
 	int i = 0;
 	while(i <= index)
 	{
-		tok = wcstok(text, L" ", &tempptr);
+		i++;
+		tok = wcschr(string, L' ');
+		
 		if(!tok)
 			break;
-		text = NULL;
-		i++;
+			
+		string = tok+1;
 	}
 	ret.errNum = 0;
 	ret.value.longVal = wcstol(tok, NULL, 10);
@@ -179,33 +181,34 @@ static xmlValue _xmlGetDataValLong(node * tree, int index)
 }
 
 
-static xmlValue _xmlGetDataValDouble(node * tree, int index)
+static xmlValue _xmlGetDataValDouble(const wchar_t * string, int index)
 {	//wcstok destructively modifies the string given as its first argument.  Therefore, a copy needs to be made.
 	// This is extremely costly in terms of performance, and needs to be streamlined // TODO
 	xmlValue ret;
 	ret.value.doubleVal = 0.0;
 	ret.errNum = -1;
 	
-	if(!tree)
-		return ret;	
-	if(!tree->xmlData.elementData)
+	if(!string)
 		return ret;
 		
 	int i = 0;
-	wchar_t data[wcslen(tree->xmlData.elementData) + 1];
-	wchar_t * text = data;
+	//wchar_t data[wcslen(tree->xmlData.elementData) + 1];
+	//wchar_t * text = data;
 	wchar_t * tok = NULL;
-	wchar_t * tempptr = NULL;
+	//wchar_t * tempptr = NULL;
 	
-	wcsncpy(data, tree->xmlData.elementData, wcslen(tree->xmlData.elementData));
+	//wcsncpy(data, tree->xmlData.elementData, wcslen(tree->xmlData.elementData));
 
 	while(i <= index)
 	{
+		
 		i++;
-		tok = wcstok(text, L" ", &tempptr);
+		tok = wcschr(string, L' ');
+		
 		if(!tok)
 			break;
-		text = NULL;	
+			
+		string = tok+1;
 	}
 //	if(i != index)
 //	{	
@@ -213,7 +216,7 @@ static xmlValue _xmlGetDataValDouble(node * tree, int index)
 //		_xmlSetError("couldn't get requested index, not enough values in array%d\n", i);
 //		return ret;	// if an out of bounds index was requested, return NaN
 //	}
-	ret.value.doubleVal = wcstod(tok, NULL);
+	ret.value.doubleVal = wcstod(string, NULL);
 	ret.errNum = 0;
 	return ret;
 }
@@ -259,7 +262,7 @@ double * xmlGetDataArrayDouble(node * tree, int count)
 
 	for(i = 0; i < count; i ++)
 	{
-		temp = _xmlGetDataValDouble(tree, i);
+		temp = _xmlGetDataValDouble(tree->xmlData.elementData, i);
 		if(temp.errNum != 0) //NaN test for errors
 		{
 			free(values);
@@ -287,7 +290,7 @@ long * xmlGetDataArrayLong(node * tree, int count)
 
 	for(i = 0; i < count; i ++)
 	{
-		temp = _xmlGetDataValLong(tree, i);
+		temp = _xmlGetDataValLong(tree->xmlData.elementData, i);
 		if(temp.errNum != 0) //NaN test for errors
 		{
 			free(values);
@@ -331,7 +334,47 @@ char * xmlGetDataArrayStringUTF8(node * tree, int count)
 
 int xmlGetAttrCount(node * tree)
 {
-	return -1;
+	if(!tree)
+		return -1;
+	int count = 0;
+	wchar_t delim = L'\0';
+	wchar_t * string = tree->xmlData.elementAttr;
+
+	while(1)
+	{
+		string = wcschr(string, L'=');
+		if(!string)
+			break;
+		if(string[1] == L'\"')
+			delim =  L'\"';
+		else if(string[1] == L'\'')
+		{
+			delim =  L'\'';
+		}
+		else
+		{
+			_xmlSetError("malformed attribute string: %ls", tree->xmlData.elementAttr);
+			return -1;
+		}
+		
+		string++;
+		while(1)
+		{
+			string++;
+			if(*string == L'\0')
+			{
+				_xmlSetError("malformed attribute string: %ls", tree->xmlData.elementAttr);
+				return -1;
+			}
+			if(*string == delim)
+			{
+				count++;
+				break;
+			}			
+		}
+		string++;
+	}
+	return count;
 }
 
 

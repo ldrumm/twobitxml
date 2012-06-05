@@ -38,8 +38,8 @@ static xmlValue _xmlgetAttrValDouble(node * tree, const wchar_t * attrID);
 static xmlValue _xmlgetAttrValString(node * tree, const wchar_t * attrID);
 
 static int _xmlGetDataCount(node * tree);
-static xmlValue _xmlGetDataValLong(node * tree, int index);
-static xmlValue _xmlGetDataValDouble(node * tree, int index);
+static xmlValue _xmlGetDataValLong(const wchar_t * string, int index);
+static xmlValue _xmlGetDataValDouble(const wchar_t * string, int index);
 static const wchar_t * _xmlGetDataValString(node * tree);
 static xmlValue _xmlGetDataValBool(node * tree, int index);
 

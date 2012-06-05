@@ -3,6 +3,7 @@
 *.[oa]
 *.os
 a.out
+*.exe
 *.gch
 *.pch
 *.so

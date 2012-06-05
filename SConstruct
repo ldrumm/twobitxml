@@ -13,7 +13,7 @@ test_objs = ['src/tests/test.c']
 
 #optimized version for installation
 
-release_env = Environment(CCFLAGS='-O2') 
+release_env = Environment(CCFLAGS='-O2 -g') 
 release = release_env.SharedLibrary('twobitxml', lib_obj)
 Default(release)
 
