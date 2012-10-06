@@ -106,10 +106,10 @@ node * xmlGetNodeFromDotPath(node * tree, const wchar_t * dot_path, ...)
 
 /**<
 @usage
-<d = 	int representing Nth matching node on branch:
-<n =	wchar_t * representing attribute name
-<v =	wchar_t * representing attribute value
-<a = 	wchar_t * representing name="value" pair
+<d> = 	int representing Nth matching node on branch:
+<n> =	wchar_t * representing attribute name
+<v> =	wchar_t * representing attribute value
+<nv> = 	wchar_t * representing name="value" pair
  
 tree = getNodeFromDotPath("movie.credits.cast.extra<d", 3) will return the 3rd 'extra' listed as a child of movie->credits->cast
 i.e.
@@ -142,11 +142,41 @@ static xmlValue _xmlgetAttrValDouble(node * tree, const wchar_t * attrID)
 
 static xmlValue _xmlgetAttrValString(node * tree, const wchar_t * attrID)
 {
+	range tok;
 	xmlValue a;
+	wchar_t * stringVal = NULL;
 	a.errNum = -1;
+	
+	if(!tree)
+	    return a;
+
+	if(!(tree->xmlData.elementAttr))
+	    return a;	
+
+	tok.from = wcsstr(tree->xmlData.elementAttr, attrID);
+	if(!(tok.from))
+	    return a;
+
+	tok.from = wcschr(tok.from, L'\"');
+	tok.to = wcschr(tok.from + 1, L'\"');
+	stringVal = calloc((tok.to - tok.from) + 1, sizeof(wchar_t));
+	wcsncpy(stringVal, tok.from+1, (size_t)(tok.to - tok.from -1));
+	a.errNum  = 0;
+	a.value.stringVal = stringVal;
 	return a;
 }
 
+wchar_t * xmlgetAttrValString(node * tree, const wchar_t * attrID)
+{
+	xmlValue a = _xmlgetAttrValString(tree, attrID);
+	if(a.errNum != 0)
+	{
+		_xmlSetError("Attribute not found\n");
+		printf("NOT FOUND\n");
+		return NULL;
+	}
+	return a.value.stringVal;
+}
 
 static xmlValue _xmlGetDataValLong(const wchar_t * string, int index)
 {
@@ -253,22 +283,34 @@ double * xmlGetDataArrayDouble(node * tree, int count)
 		return NULL;
 	int i;
 	double * values = NULL;
+	wchar_t * string = tree->xmlData.elementData;
+	if(!string)
+		return NULL;
+	wchar_t	*tok = NULL;
 	xmlValue temp;
 //	if(count == 0)											//FIXME
 //		count = xmlGetDataCount(tree, XML_DATATYPE_LONG);	//FIXME
 	values = malloc(count * sizeof(double));
 	if(!values)
 		return NULL;
-
+	while(iswspace(*(string++)))
+		;
 	for(i = 0; i < count; i ++)
 	{
-		temp = _xmlGetDataValDouble(tree->xmlData.elementData, i);
-		if(temp.errNum != 0) //NaN test for errors
-		{
-			free(values);
-			return NULL;
-		}
-		values[i] = temp.value.doubleVal;
+		////////
+		values[i] = wcstod(string, NULL);
+		tok = wcschr(string, L' ');
+		if(!tok)
+			break;
+		string = tok+1;
+		/////////
+//		temp = _xmlGetDataValDouble(tree->xmlData.elementData, i);
+//		if(temp.errNum != 0) //NaN test for errors
+//		{
+//			free(values);
+//			return NULL;
+//		}
+		
 	}
 	return values;
 }
@@ -323,6 +365,7 @@ wchar_t * xmlGetDataArrayString(node * tree, int count)
 	}
 	return NULL;
 }
+
 
 
 char * xmlGetDataArrayStringUTF8(node * tree, int count)

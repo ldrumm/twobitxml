@@ -32,12 +32,15 @@ cachegrind.out.*
 *.log
 *.sql
 *.sqlite
+*.dblite
 
 # Doxygen Generated files and tests #
 ##########################
-test_files/*
-docs/html/*
+local/*
+build/*
 docs/latex/*
+docs/html/*
+test_files/*
 
 # OS generated files #
 ######################

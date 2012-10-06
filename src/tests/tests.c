@@ -23,16 +23,19 @@ int main(int argc, char ** argv)
 	tree = xmlTreeTop(tree);
 //	xmlTreePrint(tree);
 //	xmlTreeSaveGraphviz(tree, "dotfile.gv", NULL, 0);
-	tree = xmlGetNodeFromDotPath(tree, L"COLLADA.library_geometries.geometry.mesh.source.technique_common.accessor.param<%d",2);
+	tree = xmlGetNodeFromDotPath(tree, L"COLLADA.library_geometries.geometry.mesh.source.float_array");
 	if(!tree)
 	{
 		printf("xmlGetNodeFromDotPathVAarg():failed\n");
 		exit(EXIT_FAILURE);
 	}
-	printf("%ls\n", tree->xmlData.elementAttr);
+	printf("attributes:%ls\n", tree->xmlData.elementAttr);
 	int attrC = xmlGetAttrCount(tree);
 	printf("%d attributes\n", attrC);
-	printf("%s\n", xmlGetErrMesg());
+	printf("error:%s\n", xmlGetErrMesg());
+	printf("id=%ls\n", xmlgetAttrValString(tree, L"id"));
+	printf("count=%ls\n", xmlgetAttrValString(tree, L"count"));
+	printf("error:%ls\n", xmlGetErrMesg());
 //	printf("%ls\n", tree->xmlData.elementData);
 
 
@@ -44,14 +47,15 @@ int main(int argc, char ** argv)
 	//iVals = xmlGetDataArrayLong(tree, 52);
 	//s = xmlGetDataArrayString(tree, 0);
 	
-	if(dVals)
-	{
-		i = 0;
-		while(i < 52){
-		printf("%f\n", dVals[i]);
-		i++;}
-		free(dVals);
-	}
+//	if(dVals)
+//	{
+//		i = 0;
+//		while(i < 52){
+//		printf("%f\n", dVals[i]);
+//		i++;}
+//		free(dVals);
+//	}
+//	else(printf("NULL\n"));
 //	if(iVals)
 //	{
 //		i = 0;
