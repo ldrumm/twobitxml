@@ -7,13 +7,13 @@ test_objs = ['src/tests/test.c']
 
 
 #debug version for testing
-#debug = Environment(CCFLAGS=' -O0 -ggdb3') 
+#debug = Environment(CCFLAGS=' -O2 -ggdb3 -Wall') 
 #lib_obj = ['src/xmlFunctions.c', 'src/treeFunctions.c', 'src/xmlGetters.c', 'src/xmlGetDOM.c', 'src/xmlError.c']
 #debug.SharedLibrary('twobitxml', lib_obj)
 
 #optimized version for installation
 
-release_env = Environment(CCFLAGS='-O0 -ggdb3') 
+release_env = Environment(CCFLAGS='-O2 -ggdb3') 
 release = release_env.SharedLibrary('twobitxml', lib_obj)
 Default(release)
 

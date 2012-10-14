@@ -30,7 +30,7 @@ freely, subject to the following restrictions:
 @param [in] dot_path The dotted path indicating heirarchy of the data.
 @param [in] ... optional list of variables as indicated by format specifiers in the dotpath.
 @return The node requested or NULL on failure.*/
-node * xmlGetNodeFromDotPath(node * tree, const wchar_t * dot_path, ...)
+node * xmlGetNodeFromDotPath(node * tree, const wchar_t * dot_path, ...)//TODO see issue #1
 {
 //	void * arg;
 //	size_t len;
@@ -79,7 +79,6 @@ node * xmlGetNodeFromDotPath(node * tree, const wchar_t * dot_path, ...)
 					
 					while(tempi--)
 					{
-						
 						tree = xmlTreeSearchElementSiblingsID(tree->right, tok);
 						if(!tree)
 							return NULL;	
@@ -87,7 +86,10 @@ node * xmlGetNodeFromDotPath(node * tree, const wchar_t * dot_path, ...)
 				}
 				case 'n': 
 				{
-					tempcp = va_arg(argp, wchar_t *);
+					tempcp = va_arg(argp, wchar_t *);		
+					if(!(xmlGetAttrValString(tree, tempcp))){
+						return NULL;
+					}
 					//TODO
 				}
 				case 'v': 
@@ -96,10 +98,10 @@ node * xmlGetNodeFromDotPath(node * tree, const wchar_t * dot_path, ...)
 					//TODO
 				}
 				default: break;
-			}
-		}
+			}	//switch
+		}	//for
 		tree = xmlTreeSearchSubElementID(tree, tok);
-	}
+	}//while(1)
 	va_end(argp);
 	return tree;
 }
@@ -236,16 +238,14 @@ static xmlValue _xmlGetDataValDouble(const wchar_t * string, int index)
 		tok = wcschr(string, L' ');
 		
 		if(!tok)
-			break;
-			
+		{
+			ret.errNum = -1;
+			ret.value.doubleVal = 0.f/0.f;	//NaN
+			return ret;
+		}	
 		string = tok+1;
 	}
-//	if(i != index)
-//	{	
-//		FIXME
-//		_xmlSetError("couldn't get requested index, not enough values in array%d\n", i);
-//		return ret;	// if an out of bounds index was requested, return NaN
-//	}
+
 	ret.value.doubleVal = wcstod(string, NULL);
 	ret.errNum = 0;
 	return ret;
@@ -288,7 +288,7 @@ double * xmlGetDataArrayDouble(node * tree, int count)
 		return NULL;
 	wchar_t	*tok = NULL;
 	xmlValue temp;
-//	if(count == 0)											//FIXME
+//	if(count == 0)											//FIXME 
 //		count = xmlGetDataCount(tree, XML_DATATYPE_LONG);	//FIXME
 	values = malloc(count * sizeof(double));
 	if(!values)
@@ -300,7 +300,7 @@ double * xmlGetDataArrayDouble(node * tree, int count)
 		////////
 		values[i] = wcstod(string, NULL);
 		tok = wcschr(string, L' ');
-		if(!tok)
+		if(!tok)	//return NULL? see issue #3
 			break;
 		string = tok+1;
 		/////////
