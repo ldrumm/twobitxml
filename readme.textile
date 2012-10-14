@@ -59,4 +59,5 @@ A Doxygen generated programmers' manual is available in PDF, HTML etc, and can b
 </pre>
 
 h2. *License*
+
 This software is Copyright (C) Luke Drummond, but is licensed to the community under the very liberal "zlib licence":https://en.wikipedia.org/wiki/Zlib_license
