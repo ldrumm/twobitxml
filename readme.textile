@@ -1,11 +1,13 @@
-*libtwobitxml* is a lightweight DOM-based xml parsing library written in C. It is non-validating and intended to simplify a programmers route to proper XML import. The library features an API designed specifically for the import of game data stored in XML.  Most other XML parsers assume a great deal of xml-structural knowledge of the user, and require a great deal of hand-wringing to get data out of the XML file in a language-native type.  This is especially difficult for C, as the language provides no simple databinding mechanisms in contrast to high-level languages like JavaScript. 
+**This repository is an old experiment and unlikely to be updated**
+
+*libtwobitxml* is a DOM-based xml parsing library written in C. It is non-validating and intended to simplify a programmer's route to proper XML import. The library features an API designed specifically for the import of game data stored in XML.  Most other XML parsers assume a great deal of xml-structural knowledge of the user, and require a great deal of hand-wringing to get data out of the XML file in a language-native type.  This is especially difficult for C, as the language provides no simple databinding mechanisms in contrast to high-level languages like JavaScript. 
 With libtwobitxml user no longer needs to concentrate on the binding between XML source data and native program data. around every node fetch, as the API is built around enabling simple data fetching routines.
 
 h2. *Features*
 
-* A very simple and elegant API that allows proper XML file import, search, and C-native-type extraction in less than twelve parsecs (about 4 function calls).
+* A very simple API that allows proper XML file import, search, and C-native-type extraction in less than twelve parsecs (about 4 function calls).
 * Fairly robust, ignoring unknown entities, and gracefully handling badly-formed XML.
-* All text files are converted internally to full unicode, using libiconv, so almost all text encodings can be handled with little or no modification to the library.
+* All text files are converted internally to full unicode, using libiconv, so almost all text encodings can be handled with little or no modification to the library. (This increases the overhead somewhat).
 * Very helpful Graphviz DOTfile generator for visualisation of the XML DOM heirarchy. 
 Generated file visualised with "XDot":https://code.google.com/p/jrfonseca/wiki/XDot below:
 
