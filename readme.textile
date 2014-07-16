@@ -14,22 +14,13 @@ Generated file visualised with "XDot":https://code.google.com/p/jrfonseca/wiki/X
 h2. **Three Step Tutorial**
  
 **1 - Import your XML file**
-
-
-    @node * tree = xmlGetDOMFromFile("path/to/my/file.xml");@
-    
+	```node * tree = xmlGetDOMFromFile("path/to/my/file.xml");```
     
  **2 - Find the node you need**
-
-
-    @tree = xmlGetNodeFromDotPath(tree, L"DocRoot.drawing.pixels.rgb_triplets");@
-    
+    ```tree = xmlGetNodeFromDotPath(tree, L"DocRoot.drawing.pixels.rgb_triplets");```
 
  **3 - Get the data you want as a C-native type using familiar Javascript like dotted separators**
-
-
-    @myFloatArray = xmlGetDataArrayDouble(tree, 12); //get a native C array of 12 data elements@
-  
+    ```myFloatArray = xmlGetDataArrayDouble(tree, 12); //get a native C array of 12 data elements```
 
 h2. *Dependencies and Supported systems*
 
@@ -41,7 +32,7 @@ h2. *Getting and Building*
 
 After cloning the source tree, you can build this very quickly.  The simplest possible scons file has been included, but if you don't use scons, this should do:
 <pre>
-1. git clone git://github.com/herebedragons/twobitxml.git
+1. git clone git://github.com/ldrumm/twobitxml/twobitxml.git
 2. `cd twobitxml/src`
 3. `gcc *.c -fPIC -shared -olibtwobitxml.so` 
 </pre>
